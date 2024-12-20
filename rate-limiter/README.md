@@ -34,6 +34,7 @@ Note
 common practice
 ```
 
-![Screenshot 2024-12-20 at 15 23 14](https://github.com/user-attachments/assets/eec25e82-453d-4e70-9bc1-624f8710e586)
+![Screenshot 2024-12-20 at 15 26 48](https://github.com/user-attachments/assets/1912c5d8-ed10-4e28-aefb-89fb0f50f25d)
+
 
 
