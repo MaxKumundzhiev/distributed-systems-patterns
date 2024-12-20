@@ -25,11 +25,15 @@ Moreover, someone else might be challanged to develop a client side.
 Note
 common practice
 ```
+![Screenshot 2024-12-20 at 15 20 23](https://github.com/user-attachments/assets/031173ae-79fb-4ea7-8f81-e84b69b28ac3)
+
+
 3. place between a client and a server (aka gateway)
 ```text
 Note
 common practice
 ```
 
+![Screenshot 2024-12-20 at 15 23 14](https://github.com/user-attachments/assets/eec25e82-453d-4e70-9bc1-624f8710e586)
 
 
