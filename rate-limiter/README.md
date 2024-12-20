@@ -1,5 +1,5 @@
 # Designing Rate Limiter
-Rate limiter is meant to be used in network systems for managing the speed of transfering the data from a client to a server. In the world of HTTP it is meant to limit the amount of requests, which user might send for the certain period of time. If the limit is exceeded, all the next requests are supposed to be blocked.
+Rate limiter is meant to be used in network systems for managing the speed of transfering the data from a client to a server. In the world of HTTP it is meant to limit the amount of requests, which user might send for the certain period of time. If the limit is exceeded, all the next requests are supposed to be blocked. There is a dedicated `429 HTTP status` code, which states - too many requests.
 
 ## User-wise cases:
 - user can create not grater than 2 messages per second;
@@ -12,7 +12,24 @@ Rate limiter is meant to be used in network systems for managing the speed of tr
 - Saving budget, limiting exhausting requests, freeing up more resources for high priority requests;
 - Prevention of overloading servers. To do so, rate limiters might filter out low priority requests;
 
-
+## Where to place rate limiter?
+Commonly there are 3 main options:
+1. place on a client side
+```text
+Note
+Client side is not the most `safe` place to put a rate limiter, because clients requests might be easily forged by attackes. 
+Moreover, someone else might be challanged to develop a client side.
+```
+2. place on a server side
+```text
+Note
+common practice
+```
+3. place between a client and a server (aka gateway)
+```text
+Note
+common practice
+```
 
 
 
