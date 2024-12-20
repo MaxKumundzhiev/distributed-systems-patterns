@@ -37,4 +37,10 @@ common practice
 ![Screenshot 2024-12-20 at 15 26 48](https://github.com/user-attachments/assets/1912c5d8-ed10-4e28-aefb-89fb0f50f25d)
 
 
-
+## Rate limiter algorithms
+Implementaion of rate limiter might be done in various ways, where each has its pros and cons. Here's list of most popular ones:
+- token bucket
+- leaking bucket
+- fixed window counter
+- sliding window log
+- sliding window counter
