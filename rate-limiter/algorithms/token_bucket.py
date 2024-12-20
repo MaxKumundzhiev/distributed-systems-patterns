@@ -33,94 +33,53 @@ Input parameters for:
     refill frequency per second: int - amount of tokens, which are added to the bucket at every second
 """
 
-import argparse
 import asyncio
-import datetime
-
+import random
 from loguru import logger
 
 
-class TokenBucket:
-    def __init__(self, tokens_per_second: int):
-        self.tokens_per_second = tokens_per_second
-        self.refresh_time = 1 / self.tokens_per_second
-        self.tokens = 0
-
-    async def start(self):
-        """Drip tokens into the bucket."""
-        self.tokens = self.tokens_per_second
+class TokenBucketRateLimiter:
+    def __init__(self, max_capacity: int, refill_delay: int):
+        self.max_capacity = max_capacity
+        self.refill_delay = refill_delay
+        self.counter_at_the_moment = max_capacity  # Start with a full bucket
+        self.lock = asyncio.Lock()  # Ensure thread safety for counter updates
+    
+    async def refill(self):
+        """Refill bucket periodically."""
         while True:
-            start = datetime.datetime.utcnow()
-            await asyncio.sleep(self.refresh_time)
-            end = datetime.datetime.utcnow()
-            elapsed = (end - start).total_seconds()
-            # There's no guarantee when the asyncio runtime will drop back into
-            # this method after the sleep, so we must compute how long we were
-            # asleep for and fill up with an appropriate number of tokens
-            tokens_to_add = self.tokens_per_second * elapsed
-            self.tokens = min(self.tokens + tokens_to_add, self.tokens_per_second)
+            await asyncio.sleep(self.refill_delay)
+            async with self.lock:
+                if self.counter_at_the_moment < self.max_capacity:
+                    remaining = self.max_capacity - self.counter_at_the_moment
+                    self.counter_at_the_moment += remaining
+                    logger.info(f'Refilled: {remaining} tokens added. Total: {self.counter_at_the_moment}')
+    
+    async def worker(self, task_id: int):
+        """Simulates a worker processing a request."""
+        async with self.lock:
+            if self.counter_at_the_moment > 0:
+                self.counter_at_the_moment -= 1
+                logger.info(f'Task {task_id}: Forwarded. Tokens left: {self.counter_at_the_moment}')
+            else:
+                logger.warning(f'Task {task_id}: Declined. Tokens left: {self.counter_at_the_moment}')
 
-    async def get_token(self):
-        """Take one token from the bucket.
-        Awaits on a token being available.
-        """
-        while self.tokens < 1:
-            await asyncio.sleep(self.refresh_time)
-        self.tokens -= 1
-
-
-async def start_bucket(bucket: TokenBucket):
-    await bucket.start()
-
-
-async def start_app(bucket: TokenBucket, api_calls_per_second: int):
-    period_start = datetime.datetime.utcnow()
-    period_calls = 0
-    # Exponential moving average coefficient
-    alpha = 0.5
-    ncalls_average = 0.0
+async def simulate_rate_limiter():
+    # Parameters
+    max_capacity = 10
+    refill_delay = 5  # seconds
+    rate_limiter = TokenBucketRateLimiter(max_capacity, refill_delay)
+    
+    # Run refill in the background
+    asyncio.create_task(rate_limiter.refill())
+    
+    # Generate random tasks
+    task_id = 0
     while True:
-        period_calls += 1
-        # Wait until a token is available
-        await bucket.get_token()
-        # Simulate an API call
-        await asyncio.sleep(delay=1 / api_calls_per_second)
-        time_delta = (datetime.datetime.utcnow() - period_start).total_seconds()
-        # Log statistics every second
-        if time_delta > 1:
-            period_ncalls = period_calls / time_delta
-            ncalls_average = alpha * period_ncalls + (1 - alpha) * ncalls_average
-            logger.info(f"{ncalls_average:.2f} calls/second")
-            # Reset counters
-            period_calls = 0
-            period_start = datetime.datetime.utcnow()
+        await asyncio.sleep(random.uniform(0.2, 0.5))  # Random delay between tasks
+        asyncio.create_task(rate_limiter.worker(task_id))
+        task_id += 1
 
-
-async def main(tokens_per_second: int, api_calls_per_second: int):
-    logger.info("Starting app")
-    logger.info(f"API target: {api_calls_per_second} per second")
-    logger.info(f"Rate limit: {tokens_per_second} per second")
-    bucket = TokenBucket(tokens_per_second=tokens_per_second)
-    await asyncio.gather(
-        start_bucket(bucket),
-        start_app(bucket, api_calls_per_second=api_calls_per_second),
-    )
-
-
+# Run the simulation
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--target",
-        help="Number of 'API' calls per second to attempt to make.",
-        type=int,
-        default=20,
-    )
-    parser.add_argument(
-        "--limit",
-        help="Per-second rate limit to apply to API calls.",
-        type=int,
-        default=10,
-    )
-    args = parser.parse_args()
-
-    asyncio.run(main(tokens_per_second=args.limit, api_calls_per_second=args.target))
+    asyncio.run(simulate_rate_limiter())
