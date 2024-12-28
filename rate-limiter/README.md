@@ -56,3 +56,9 @@ We concluded rate limiter is always about utilize an algorithm which composes so
 2. gateway (rate limiter) get counter from certain bucket from cache and checks the limit
     - if limit exceeds - request declines
     - if limit accepatble, request is redirected to the servers, in the meantime, counter is incremented and sent to the cache
+
+
+## Rate Limiter in distributed environment
+When developing rate limiter for disrtibuted environment, u commonly face 2 main issues:
+1. race condition - resolved by `locking`
+2. difficulty of syncronization - resolved by `centralized storage`
