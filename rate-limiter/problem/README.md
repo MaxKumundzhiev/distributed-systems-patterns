@@ -1,0 +1,2 @@
+# Problem Statement
+Assume, we have a system, which allows user to like or dislike a publication. We want to introduce a rate limiter for such a scenario, whereas user is allowed to action no grater than 50 times per minute, otherwise will get a "too much requests", wait for certain time.
