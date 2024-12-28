@@ -49,3 +49,5 @@ common practice
 
 ## General Architecture
 We concluded rate limiter is always about utilize an algorithm which composes some counter. The question now - `where to store` a counter. Due to data base is commonly too slow, we might use cache a storage, i.e. Redis, which supports features as `INCR` - increments the stored counter and `EXPIRE` - set a duration for the counter.
+<img width="541" alt="Screenshot 2024-12-28 at 20 15 54" src="https://github.com/user-attachments/assets/b04dce85-b8d0-455b-8efb-2e70a0b35df2" />
+
