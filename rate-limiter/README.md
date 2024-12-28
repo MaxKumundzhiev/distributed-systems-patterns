@@ -62,3 +62,4 @@ We concluded rate limiter is always about utilize an algorithm which composes so
 When developing rate limiter for disrtibuted environment, u commonly face 2 main issues:
 1. race condition - resolved by `locking`
 2. difficulty of syncronization - resolved by `centralized storage`
+<img width="845" alt="Screenshot 2024-12-28 at 20 48 25" src="https://github.com/user-attachments/assets/9fb0b67f-6b8e-4b6b-8cd0-be7d1ca395f6" />
