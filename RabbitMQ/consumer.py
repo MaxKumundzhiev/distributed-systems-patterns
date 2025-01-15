@@ -1,39 +1,44 @@
 from os import getenv
-from time import sleep
 from datetime import datetime
-
-from random import uniform
 
 from loguru import logger
 from connection import ConnectionClient
 
 from pika.adapters.blocking_connection import BlockingChannel
+from pika.spec import BasicProperties, Basic 
 
 
-def declare_queue(channel: BlockingChannel) -> None:
-    queue_name = getenv("TASKS_QUEUE_MAIN_QUEUE_NAME")
+def process(
+    channel: BlockingChannel, method: Basic.Deliver, properties: BasicProperties, body: bytes
+):
+    logger.info(f"channel {channel}")
+    logger.info(f"method {method}")
+    logger.info(f"preperties {properties}")
+    logger.info(f"body {body}")
+
+    now = str(datetime.now())
+    logger.success(f"processed message at {now}")
+    channel.basic_ack(delivery_tag=method.delivery_tag)
+    logger.success(f"sent ack to {method.delivery_tag}")
+
+
+def consume_messages(channel: BlockingChannel) -> None:
     try:
-        channel.queue_declare(queue=queue_name)
-        logger.success(f"declared queue {queue_name} for channel {channel}")
-    except Exception as e:
-        logger.error(f"failed declare queue {queue_name} for channel {channel} with error: {e}")
-        raise e
-
-
-def publish_message(channel: BlockingChannel) -> None:
-    now, queue = str(datetime.now()), getenv("TASKS_QUEUE_MAIN_QUEUE_NAME")
-    try:
-        channel.basic_publish(
-            exchange="", routing_key=queue, body=f"published at {now}"
+        channel.basic_consume(
+            queue=getenv("TASKS_QUEUE_MAIN_QUEUE_NAME"),
+            on_message_callback=process
         )
-        logger.success(f"published message to channel {channel} at {now}")
     except Exception as e:
-        logger.error(f"failed publish message with error: {e}")
-        raise e
-    return
+        logger.error(f"failed establish consumer for channel {channel} with error: {e}")
+    
+    try:
+        logger.info("waiting for messages ...")
+        channel.start_consuming()
+    except Exception as e:
+        logger.error(f"failed to consume from channel {channel} with error: {e}")
 
 
-def kick_off_publisher():
+def kick_off_consumer():
     client = ConnectionClient()
     # create a connection to tasks queue
     try:
@@ -58,16 +63,11 @@ def kick_off_publisher():
         with channel as chn:
             logger.success(f"channel in connection is created: {chn}")
             logger.info(f"channel is open: {chn.is_open}")
-
-            declare_queue(channel=chn)
-            while True:
-                publish_message(channel=chn)
-                random = uniform(1,10)
-                sleep(random)
+            consume_messages(channel=chn)
 
 
 if __name__ == "__main__":
     try:
-        kick_off_publisher()
+        kick_off_consumer()
     except KeyboardInterrupt:
-        logger.warning("stopped publisher by keyboard interruption")
+        logger.warning("stopped consumer by keyboard interruption")

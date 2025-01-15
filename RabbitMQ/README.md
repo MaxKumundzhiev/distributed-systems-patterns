@@ -19,3 +19,8 @@ $ docker compose up -d
 ```bash
 $ python publisher.py
 ```
+
+*Spin up consumer*
+```bash
+$ python consumer.py
+```
