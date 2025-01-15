@@ -1,0 +1,16 @@
+services:
+  tasks-queue:
+    image: rabbitmq:3-management-alpine
+    hostname: tasks_queue
+    container_name: tasks_queue
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+    volumes:
+      - tasks-queue-data:/var/lib/rabbitmq
+
+volumes:
+  tasks-queue-data:
