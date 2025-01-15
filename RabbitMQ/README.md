@@ -9,7 +9,13 @@
 RabbitMQ is a implementation of `tasks` queue. RabbitMQ works on `AMQP` protocol.
 
 
-## Spin up
+## Run components
+*Spin up RabbitMQ with manager*
 ```bash
 $ docker compose up -d
+```
+
+*Spin up publisher*
+```bash
+$ python publisher.py
 ```
