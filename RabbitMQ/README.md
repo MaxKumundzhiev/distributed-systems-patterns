@@ -11,5 +11,5 @@ RabbitMQ is a implementation of `tasks` queue. RabbitMQ works on `AMQP` protocol
 
 ## Spin up
 ```bash
-$ 
+$ docker compose up -d
 ```
