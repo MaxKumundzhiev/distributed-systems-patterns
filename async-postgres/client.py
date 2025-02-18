@@ -11,7 +11,7 @@ from statements import (
     COLOR_INSERT
 )
 
-async def main():
+async def get_connection():
     connection = await asyncpg.connect(
         host="127.0.0.1",
         port=5430,
@@ -21,7 +21,11 @@ async def main():
     )
     version = connection.get_server_version()
     print(f"Connected! Version of Postgres {version}")
+    return connection
 
+
+async def creation():
+    connection = await get_connection()
 
     statements = [
         CREATE_BRAND_TABLE,
@@ -39,4 +43,19 @@ async def main():
     print("db tables created")
     await connection.close()
 
-asyncio.run(main())
+
+async def insert_and_fetch():
+    from asyncpg import Record
+    from typing import List
+
+    connection = await get_connection()
+    await connection.execute("INSERT INTO brand VALUES(DEFAULT, 'Levis')")
+    await connection.execute("INSERT INTO brand VALUES(DEFAULT, 'Seven')")
+
+    brand_query = "SELECT brand_id, brand_name FROM brand;"
+    result: List[Record] = await connection.fetch(brand_query)
+    for brand in result:
+        print(f"id {brand['brand_id']}, name: {brand['brand_name']}")
+    await connection.close()
+
+asyncio.run(insert_and_fetch())
