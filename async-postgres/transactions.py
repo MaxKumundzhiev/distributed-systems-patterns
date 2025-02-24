@@ -48,5 +48,15 @@ async def fail_transaction():
             print(f"query res: {brands}")
             await connection.close()
 
+async def nested_transaction():
+    connection = await get_connection()
+    async with connection.transaction():
+        await connection.execute("INSERT INTO brand VALUES(DEFAULT, 'my_new_brand')")
+        try:
+            async with connection.transaction():
+                await connection.execute("INSERT INTO product_color VALUES(1, 'black')")
+        except Exception:
+            print('issue while inserting color')
+    await connection.close()
 
-asyncio.run(fail_transaction())
+asyncio.run(nested_transaction())
