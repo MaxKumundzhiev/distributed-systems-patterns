@@ -18,7 +18,7 @@ class Response(BaseModel):
     circuit_breaker_details: dict
 
 
-server = FastAPI(title="service")
+server = FastAPI(title="caller")
 
 @server.post("/", response_model=Response)
 async def post_to_callee(request: Request):
